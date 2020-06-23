@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 
 import linecache
 import fileinput
@@ -50,18 +50,47 @@ def utf8_converter(file_path, universal_endline=True):
     srt_to_vtt(file_path)
     return 0
 
+def python3(file_path, universal_endline=True):
+    '''
+    https://stackoverflow.com/questions/8898294/convert-utf-8-with-bom-to-utf-8-with-no-bom-in-python
+    '''
+
+    # Fix file path
+    file_path = os.path.realpath(os.path.expanduser(file_path))
+
+    # Read from file
+    raw = open(file_path, mode='r', encoding='utf-8-sig').read()
+    open(bom_file, mode='w', encoding='utf-8').write(raw)
+    raw = file_open.read()
+    file_open.close()
+
+    # Write to file
+    file_open = open(file_path, 'w')
+    file_open.write(str(raw))
+    file_open.close()
+    srt_to_vtt(file_path)
+    return 0
+
 
 def srt_to_vtt(path):
+    print('converting SRT to VTT...')
     with open(path, 'r') as myfile: #USE THIS ONCE UPGRADE TO PYTHON 3.x
-        text = myfile.read()
-        captions1 = re.sub(r'(^\d\d\:\d\d\:\d\d)\,(\d\d\d)( --> \d\d\:\d\d\:\d\d)\,(\d\d\d)',r'\1.\2\3.\4',text, flags=re.MULTILINE)
-        captions2 = re.sub(r'^\d{1,6}\n(\d)',r'\1',captions1, flags=re.MULTILINE) #Remove index numbers
-        captions3 = re.sub(r'\A',r'WEBVTT\n\n',captions2, flags=re.MULTILINE) #remove WEBVTT from beginning
-        newfile = open(path[0:-4]+'.vtt','w')
-        newfile.write(captions3)
-        myfile.close()
-        newfile.close()
 
+        text = myfile.read()
+        captions1 = re.sub(r'^\d{1,6}\n(\d)',r'\1',text, flags=re.MULTILINE) #Remove index numbers
+        captions2 = re.sub(r'(^\d\d\:\d\d\:\d\d)\,(\d\d\d)( --> \d\d\:\d\d\:\d\d)\,(\d\d\d)',r'\1.\2\3.\4',captions1, flags=re.MULTILINE)
+        captions3 = re.sub(r'\A',r'WEBVTT\n\n',captions2, flags=re.MULTILINE) #remove WEBVTT from beginning
+        captions4 = re.sub(r'\A',r'',captions3, flags=re.MULTILINE) #remove WEBVTT from beginning
+        new_vtt_file = open(path[0:-4]+'.vtt','w')
+        new_vtt_file.write(captions3)
+        new_vtt_file.close()
+        new_vtt_file.close()
+
+
+'''
+Run command and drop in SRT file to convert
+Process input and send to appropriate function
+'''
 if len(sys.argv) > 1: #check that there's at least something for an arugment.
     file_path = sys.argv[1] #set variable to path/filename
     print("file_path: " + file_path)
@@ -69,7 +98,8 @@ if len(sys.argv) > 1: #check that there's at least something for an arugment.
     print("filename: " + filename)
     if filename.lower().endswith('.srt'): #test if srt
         print("working on srt file: " + filename)
-        utf8_converter(file_path) #strips out BOM encoding, then calls converter function
+        # utf8_converter(file_path) #strips out BOM encoding, then calls converter function
+        srt_to_vtt(file_path)
     elif filename.lower().endswith('.vtt'): #test if vtt
         print("\n\n******* only accepts SRT *******\nfile provided: "+ filename + "\n\n")
 
