@@ -1,2 +1,2 @@
 # caption_converter
-Converts SRT and VTT back and forth
+Converts SRT and VTT and exports as plain TXT
