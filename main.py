@@ -22,6 +22,20 @@ def srt_to_txt(path,captions):
     txt.close()
 
 
+def vtt_to_txt(path):
+    with open(path, 'r') as myfile: #USE THIS ONCE UPGRADE TO PYTHON 3.x
+
+        text = myfile.read()
+        strip_r = re.sub('\r','',text) #strip our all /r's - some vtt files have /r and /n.
+        strip_vtt = re.sub('WEBVTT\n','',strip_r) #remove WEBVTT heading
+        strip_1st_line = re.sub('\n\n\n','',strip_vtt)
+        regex = r'^\d+\:\d+\:\d+\.\d+.+\n' #vtt specific match pattern
+        substr = ''
+        plainText = re.sub(regex, substr, strip_1st_line,0, re.MULTILINE)
+        txt = open(path[0:-4]+'.txt','w')
+        txt.write(plainText)
+        txt.close()
+
 def srt_to_vtt(path):
     print('converting SRT to VTT...')
     with open(path, 'r') as myfile: #USE THIS ONCE UPGRADE TO PYTHON 3.x
@@ -53,7 +67,8 @@ if len(sys.argv) > 1: #check that there's at least something for an arugment.
         # utf8_converter(file_path) #strips out BOM encoding, then calls converter function
         srt_to_vtt(file_path)
     elif filename.lower().endswith('.vtt'): #test if vtt
-        print("\n\n******* only accepts SRT *******\nfile provided: "+ filename + "\n\n")
+        print("******* coverting VTT to TXT *******")
+        vtt_to_txt(file_path,)
 
     else:
         print("\n\n******* only accepts SRT *******\nfile provided: "+ filename + "\n\n") #if neither vtt or srt
